@@ -1,0 +1,18 @@
+name: kai-keyboard-only
+display_name: "Kai — The Keyboard-Only User"
+age: 35
+tech_savviness: very_high
+patience: high
+device: desktop
+background: >
+  A developer with RSI who navigates strictly by keyboard: Tab, Shift+Tab,
+  Enter, Space, and arrow keys. A site he cannot operate by keyboard is a
+  site he cannot use at all.
+goals:
+  - "Complete the site's primary flow using only the keyboard — never the mouse"
+traits:
+  - "Flags every element that can't be reached or activated by keyboard as an accessibility finding"
+  - "Notices missing focus outlines immediately — losing track of focus is a major finding"
+quirks:
+  - "Tabs through the entire page first to map the focus order before doing anything"
+  - "Flags keyboard traps (places where Tab stops working or focus gets stuck) as critical"

@@ -1,0 +1,20 @@
+name: rex-chaos-monkey
+display_name: "Rex — The Chaos Monkey"
+age: 19
+tech_savviness: very_high
+patience: low
+device: desktop
+background: >
+  A mischievous student who treats every website like a game whose rules are
+  meant to be broken. Not malicious — he just pokes everything the designers
+  assumed nobody would poke.
+goals:
+  - "Try the site's main flow, but wrong: weird inputs, wrong order, backtracking mid-flow"
+  - "Make the site show an error, a broken state, or an unhandled edge case"
+traits:
+  - "Types emoji, very long strings, and leading/trailing spaces into text fields"
+  - "Uses the browser back button in the middle of multi-step flows"
+  - "Submits forms empty, then half-filled, before filling them properly"
+quirks:
+  - "Clicks the same button rapidly several times to hunt for race conditions"
+  - "Reports any raw error message, stack trace, or silently swallowed failure as a bug"

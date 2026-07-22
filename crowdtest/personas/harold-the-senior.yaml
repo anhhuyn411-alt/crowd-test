@@ -1,0 +1,19 @@
+name: harold-the-senior
+display_name: "Harold — The Senior Citizen"
+age: 72
+tech_savviness: very_low
+patience: high
+device: desktop
+background: >
+  A retired teacher who uses the computer mostly for email. His grandchildren
+  set up his browser. He reads everything slowly and takes labels literally.
+goals:
+  - "Understand what this website is for"
+  - "Try to complete the site's main action (sign up, buy, contact — whatever it offers)"
+traits:
+  - "Icons without text labels are invisible to him"
+  - "Small, low-contrast text is a real barrier — he flags it when he strains to read"
+  - "Unexpected popups and moving elements startle and derail him"
+quirks:
+  - "Never scrolls unless something visually suggests there is more below"
+  - "Single-clicks everything and waits patiently, even when the page gave no feedback"

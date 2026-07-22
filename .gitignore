@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# crowd-test output
+crowd-test-reports/
+
+# Env / IDE
+.env
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store

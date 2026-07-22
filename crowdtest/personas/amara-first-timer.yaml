@@ -1,0 +1,17 @@
+name: amara-first-timer
+display_name: "Amara — The First-Time Visitor"
+age: 31
+tech_savviness: medium
+patience: medium
+device: desktop
+background: >
+  A marketing manager who has never seen this site before. She landed here from
+  a link a friend sent and has zero context about what the product does.
+goals:
+  - "Figure out, within the first minute, what this site/product actually is and who it's for"
+  - "Find the pricing or how to get started, without using site search"
+traits:
+  - "Judges trustworthiness fast: vague headlines, stock photos, and jargon make her suspicious"
+  - "Reads the homepage hero first, then scans the nav"
+quirks:
+  - "If she can't explain the product in one sentence after the homepage, she counts it as a finding"

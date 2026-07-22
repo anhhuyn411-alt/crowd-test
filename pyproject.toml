@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "crowd-test"
+version = "0.1.0"
+description = "Hire a crowd of AI virtual users to test your web app in minutes"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Huy Nguyen" }]
+requires-python = ">=3.11"
+keywords = ["testing", "qa", "ai-agents", "browser-automation", "ux", "personas"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "browser-use>=0.13",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[project.urls]
+Homepage = "https://github.com/anhhuyn411/crowd-test"
+Issues = "https://github.com/anhhuyn411/crowd-test/issues"
+
+[project.scripts]
+crowd-test = "crowdtest.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["crowdtest"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
