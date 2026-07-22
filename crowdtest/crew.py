@@ -8,8 +8,11 @@ from typing import Callable
 from crowdtest.persona import Persona
 from crowdtest.results import CrewResult, PersonaResult
 from crowdtest.runner import LLMFactory, run_persona
+from crowdtest.verify import verify_finding
 
 ProgressHook = Callable[[str, str], None]
+
+VERIFIED_SEVERITIES = ("critical", "major")
 
 
 async def run_crew(
@@ -21,9 +24,15 @@ async def run_crew(
     headless: bool = True,
     max_steps: int = 25,
     concurrency: int = 3,
+    verify: bool = False,
     on_progress: ProgressHook | None = None,
 ) -> CrewResult:
-    """Run every persona through the site, at most *concurrency* at a time."""
+    """Run every persona through the site, at most *concurrency* at a time.
+
+    With *verify* on, every critical/major finding is handed to an independent
+    detective agent that tries to reproduce it; refuted findings stay in the
+    report but stop counting toward the survival grade.
+    """
     semaphore = asyncio.Semaphore(max(1, concurrency))
 
     async def run_one(persona: Persona) -> PersonaResult:
@@ -41,7 +50,23 @@ async def run_crew(
             if on_progress:
                 status = "done" if result.ok else "failed"
                 on_progress(persona.name, status)
-            return result
+
+        if verify and result.ok:
+            for finding in result.findings:
+                if finding.severity not in VERIFIED_SEVERITIES:
+                    continue
+                async with semaphore:
+                    if on_progress:
+                        on_progress(f"verify: {finding.title[:40]}", "started")
+                    await verify_finding(
+                        finding, url, llm_factory, headless=headless
+                    )
+                    if on_progress:
+                        on_progress(
+                            f"verify: {finding.title[:40]}",
+                            finding.verified or "inconclusive",
+                        )
+        return result
 
     results = await asyncio.gather(*(run_one(p) for p in personas))
     return CrewResult(url=url, results=list(results))

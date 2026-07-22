@@ -9,6 +9,7 @@ venv/
 
 # crowd-test output
 crowd-test-reports/
+demo-report/
 
 # Env / IDE
 .env
@@ -18,3 +19,4 @@ crowd-test-reports/
 # OS
 Thumbs.db
 .DS_Store
+.gstack/

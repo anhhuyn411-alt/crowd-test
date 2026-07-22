@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import dataclasses
+import json
 import os
 import sys
 from pathlib import Path
@@ -83,6 +85,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             headless=not args.headed,
             max_steps=args.max_steps,
             concurrency=args.concurrency,
+            verify=args.verify,
             on_progress=on_progress,
         )
     )
@@ -90,7 +93,12 @@ def cmd_run(args: argparse.Namespace) -> int:
     print()
     print(build_markdown(crew))
     md_path, html_path = write_reports(crew, args.out)
-    print(f"\nReports written:\n  {md_path}\n  {html_path}")
+    json_path = Path(args.out) / "results.json"
+    json_path.write_text(
+        json.dumps(dataclasses.asdict(crew), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    print(f"\nReports written:\n  {md_path}\n  {html_path}\n  {json_path}")
 
     counts = crew.findings_by_severity()
     if args.fail_on_critical and counts["critical"] > 0:
@@ -149,6 +157,10 @@ def build_parser() -> argparse.ArgumentParser:
                      help="personas browsing at once (default 3)")
     run.add_argument("--max-steps", type=int, default=25,
                      help="max browser actions per persona (default 25)")
+    run.add_argument("--verify", action="store_true",
+                     help="send an independent detective agent to reproduce every "
+                          "critical/major finding; refuted ones stop counting "
+                          "toward the survival grade")
     run.add_argument("--headed", action="store_true",
                      help="show browser windows instead of headless")
     run.add_argument("--out", default="crowd-test-reports",

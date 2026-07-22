@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 import traceback
 from typing import Any, Callable
@@ -10,6 +11,13 @@ from crowdtest.persona import Persona
 from crowdtest.results import PersonaResult, extract_report, parse_persona_report
 
 LLMFactory = Callable[[], Any]
+
+# browser-use ships convenience extensions (ad blocking, cookie-banner
+# auto-dismissal, URL cleaning). A testing tool must show personas the page as
+# real users see it — cookie banners included — and we observed the extension
+# stack interfering with site JS (phantom "broken button" findings). Users can
+# re-enable by exporting BROWSER_USE_DISABLE_EXTENSIONS=0 before running.
+os.environ.setdefault("BROWSER_USE_DISABLE_EXTENSIONS", "1")
 
 
 async def run_persona(

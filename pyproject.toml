@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "crowd-test"
-version = "0.2.0"
+version = "0.3.0"
 description = "Hire a crowd of AI virtual users to test your web app in minutes"
 readme = "README.md"
 license = { text = "MIT" }

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>crowd-test — https://demo-shop.example (sample data)</title>
+<style>
+  :root { --bg:#0f1117; --card:#1a1d27; --text:#e6e8ee; --muted:#9aa0b0;
+          --critical:#ff5470; --major:#ffb454; --minor:#ffe27a; --ok:#3ddc97; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg);
+         color:var(--text); line-height:1.6; padding:2.5rem 1rem; }
+  .wrap { max-width:860px; margin:0 auto; }
+  h1 { font-size:1.5rem; margin-bottom:.25rem; }
+  .sub { color:var(--muted); margin-bottom:2rem; font-size:.9rem; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+           gap:.75rem; margin-bottom:2rem; }
+  .tile { background:var(--card); border-radius:12px; padding:1rem 1.25rem; }
+  .tile b { display:block; font-size:1.6rem; }
+  .tile span { color:var(--muted); font-size:.8rem; }
+  h2 { font-size:1.1rem; margin:2rem 0 .75rem; }
+  .finding { background:var(--card); border-radius:12px; padding:.9rem 1.1rem;
+             margin-bottom:.6rem; border-left:4px solid var(--minor); }
+  .finding.critical { border-color:var(--critical); }
+  .finding.major { border-color:var(--major); }
+  .finding .meta { color:var(--muted); font-size:.78rem; text-transform:uppercase;
+                   letter-spacing:.05em; }
+  .persona { background:var(--card); border-radius:12px; padding:1.1rem 1.25rem;
+             margin-bottom:.75rem; }
+  .persona .score { float:right; font-weight:700; }
+  .persona .score.good { color:var(--ok); }
+  .persona .score.bad { color:var(--critical); }
+  .persona blockquote { color:var(--muted); font-style:italic; margin-top:.4rem;
+                        border-left:3px solid #333a4d; padding-left:.75rem; }
+  .error { color:var(--critical); font-family:monospace; font-size:.8rem;
+           white-space:pre-wrap; }
+  footer { color:var(--muted); font-size:.8rem; margin-top:2.5rem; text-align:center; }
+  a { color:#7aa2ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>crowd-test report</h1>
+  <div class="sub">https://demo-shop.example (sample data) &middot; generated (sample — synthetic data)</div>
+
+  <div class="tiles">
+    <div class="tile"><b>F</b><span>survival grade · 38/100</span></div>
+    <div class="tile"><b>3</b><span>virtual users sent</span></div>
+    <div class="tile"><b>4.7</b><span>avg. satisfaction</span></div>
+    <div class="tile"><b>2</b><span>critical findings</span></div>
+    <div class="tile"><b>1</b><span>major findings</span></div>
+    <div class="tile"><b>2</b><span>minor findings</span></div>
+  </div>
+
+  <h2>Findings</h2>
+  
+    
+    <div class="finding critical">
+      <div class="meta">critical &middot; ux
+         &middot; Checkout step 2
+         &middot; ✅ verified</div>
+      <strong>Checkout forces account creation before showing total price</strong>
+      <div>No guest checkout; the full cost is hidden until after email verification. Cart abandoned at step 2 of 5.</div>
+      <div class="meta" style="margin-top:.3rem">detective: Reproduced on a clean load: guest path does not exist.</div>
+      <div class="meta" style="margin-top:.3rem">found by Mai — The Impatient Shopper</div>
+    </div>
+    
+    <div class="finding critical">
+      <div class="meta">critical &middot; bug
+         &middot; Checkout shipping step
+         &middot; ✅ verified</div>
+      <strong>Raw 500 error page when address contains emoji</strong>
+      <div>Address field accepts any input, but the shipping calculator crashes server-side and shows an unstyled stack trace.</div>
+      <div class="meta" style="margin-top:.3rem">detective: Reproduced: same 500 with a minimal emoji payload.</div>
+      <div class="meta" style="margin-top:.3rem">found by Rex — The Chaos Monkey</div>
+    </div>
+    
+    <div class="finding major">
+      <div class="meta">major &middot; accessibility
+         &middot; Site header
+         &middot; ✅ verified</div>
+      <strong>Header icons carry no text labels</strong>
+      <div>Menu, search, and cart are icon-only. For users who don&#39;t know the conventions, the site&#39;s entire navigation is invisible.</div>
+      <div class="meta" style="margin-top:.3rem">detective: Confirmed: no visible labels and no aria-labels on 2 of 3 header icons.</div>
+      <div class="meta" style="margin-top:.3rem">found by Harold — The Senior Citizen</div>
+    </div>
+    
+    <div class="finding major">
+      <div class="meta">major &middot; bug
+         &middot; Payment page → back
+         &middot; ⚠️ not reproduced — excluded from grade</div>
+      <strong>Browser back during payment silently empties the cart</strong>
+      <div>Going back from payment to cart loses all items with no warning; user must rebuild the cart from scratch.</div>
+      <div class="meta" style="margin-top:.3rem">detective: Could not reproduce on a clean run — cart survived the back navigation twice.</div>
+      <div class="meta" style="margin-top:.3rem">found by Rex — The Chaos Monkey</div>
+    </div>
+    
+    <div class="finding minor">
+      <div class="meta">minor &middot; performance
+         &middot; Category page
+        </div>
+      <strong>Product images load noticeably late on the listing grid</strong>
+      <div></div>
+      
+      <div class="meta" style="margin-top:.3rem">found by Mai — The Impatient Shopper</div>
+    </div>
+    
+    <div class="finding minor">
+      <div class="meta">minor &middot; ux
+         &middot; Product page
+        </div>
+      <strong>Success message disappears after 2 seconds</strong>
+      <div>The &#39;added to cart&#39; toast vanishes before a slow reader finishes reading it.</div>
+      
+      <div class="meta" style="margin-top:.3rem">found by Harold — The Senior Citizen</div>
+    </div>
+    
+  
+
+  <h2>The crowd</h2>
+  
+  <div class="persona">
+    
+      <span class="score bad">
+        3/10</span>
+      <strong>Mai — The Impatient Shopper</strong>
+      <div class="sub" style="margin:0">
+        gave up on their goal &middot; 81.0s &middot; 14 steps
+      </div>
+      <blockquote>&ldquo;Found a jacket I actually liked in about ten seconds — great start. Then checkout demanded I create an account, verify my email, AND hand over my phone number before showing shipping costs. I have meetings. I left the jacket behind.&rdquo;</blockquote>
+    
+  </div>
+  
+  <div class="persona">
+    
+      <span class="score ">
+        6/10</span>
+      <strong>Harold — The Senior Citizen</strong>
+      <div class="sub" style="margin:0">
+        achieved their goal &middot; 190.0s &middot; 22 steps
+      </div>
+      <blockquote>&ldquo;A patient afternoon got me there in the end. But I nearly gave up at the start: the little picture buttons at the top have no words, and I sat wondering what a stack of three lines could possibly mean.&rdquo;</blockquote>
+    
+  </div>
+  
+  <div class="persona">
+    
+      <span class="score ">
+        5/10</span>
+      <strong>Rex — The Chaos Monkey</strong>
+      <div class="sub" style="margin:0">
+        achieved their goal &middot; 150.0s &middot; 19 steps
+      </div>
+      <blockquote>&ldquo;Emoji in the address field? Accepted, then exploded at the shipping step with a raw 500 page. Back button during payment? Cart emptied itself. This site fears me, as it should.&rdquo;</blockquote>
+    
+  </div>
+  
+
+  <footer>made with <a href="https://github.com/anhhuyn411-alt/crowd-test">crowd-test</a>
+    &mdash; hire a crowd of AI users to test your app</footer>
+</div>
+</body>
+</html>

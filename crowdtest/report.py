@@ -56,11 +56,17 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
         lines += ["## Findings", ""]
         for result, f in findings:
             emoji = SEVERITY_EMOJI[f.severity]
+            badge = ""
+            if f.verified == "confirmed":
+                badge = " ✅ *verified by detective*"
+            elif f.verified == "not_reproduced":
+                badge = " ⚠️ *could not be reproduced — excluded from grade*"
             lines.append(
-                f"- {emoji} **[{f.severity}/{f.type}] {f.title}**"
+                f"- {emoji} **[{f.severity}/{f.type}] {f.title}**{badge}"
                 f" — {f.description} _(found by {result.display_name}"
                 + (f", at: {f.where}" if f.where else "")
                 + ")_"
+                + (f" — detective: {f.verify_notes}" if f.verify_notes else "")
             )
         lines.append("")
     else:
@@ -152,9 +158,11 @@ HTML_TEMPLATE = """<!doctype html>
     {% for result, f in findings %}
     <div class="finding {{ f.severity }}">
       <div class="meta">{{ f.severity }} &middot; {{ f.type }}
-        {% if f.where %} &middot; {{ f.where }}{% endif %}</div>
+        {% if f.where %} &middot; {{ f.where }}{% endif %}
+        {% if f.verified == 'confirmed' %} &middot; ✅ verified{% elif f.verified == 'not_reproduced' %} &middot; ⚠️ not reproduced — excluded from grade{% endif %}</div>
       <strong>{{ f.title }}</strong>
       <div>{{ f.description }}</div>
+      {% if f.verify_notes %}<div class="meta" style="margin-top:.3rem">detective: {{ f.verify_notes }}</div>{% endif %}
       <div class="meta" style="margin-top:.3rem">found by {{ result.display_name }}</div>
     </div>
     {% endfor %}

@@ -96,6 +96,30 @@ Every run ends with a verdict, computed from findings and mob satisfaction:
 
 Add `--fail-on-critical` in CI to block the merge when the mob draws blood.
 
+## The detective 🕵️
+
+A mob is dramatic — that's the point — but drama sometimes exaggerates. Add
+`--verify` and every critical/major accusation gets handed to an independent
+**detective agent**: a cold, skeptical QA engineer with no persona and no
+stake, who starts from a clean page load and tries to reproduce the issue.
+
+- ✅ **verified** — the detective reproduced it. It's real. Go fix it.
+- ⚠️ **not reproduced** — stays in the report for transparency, but stops
+  counting toward your survival grade.
+
+```bash
+crowd-test run https://your-app.com --mob 10 --verify
+```
+
+The mob accuses. The detective convicts. Your grade only bleeds for real bugs.
+
+One honest caveat: the detective drives the same browser engine as the mob, so
+an artifact of the automation stack itself can fool them both. Cross-engine
+verification (re-checking accusations in a second, independent browser stack)
+is on the roadmap. Note that crowd-test runs the browser with automation
+extensions disabled so personas see your site exactly as real users do —
+cookie banners and all.
+
 ## Quick start
 
 ```bash
@@ -113,8 +137,10 @@ crowd-test list-personas
 You get:
 
 - **`report.md`** — findings ranked by severity, ready to paste into an issue or PR
+  ([sample](examples/sample-report.md))
 - **`report.html`** — a shareable dark-mode damage report with the survival
   grade, each persona's verdict, and their in-character complaints
+- **`results.json`** — machine-readable results for your own tooling
 
 ## How it works
 
@@ -144,6 +170,9 @@ your own staging and production sites, not other people's.
 
 ## Roadmap
 
+- [x] Detective agent: adversarial verification of every critical/major finding (`--verify`)
+- [x] Machine-readable `results.json` next to every report
+- [ ] Cross-engine detective: verify accusations in a second, independent browser stack
 - [ ] GitHub Action: the mob tests your preview deploy and posts the survival grade on the PR
 - [ ] Screenshots attached to every finding
 - [ ] Survival badge for your README (`survived the mob: A`)

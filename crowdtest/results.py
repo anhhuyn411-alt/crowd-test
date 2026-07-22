@@ -17,6 +17,9 @@ class Finding:
     title: str
     description: str = ""
     where: str = ""
+    # Set by the verification pass: "confirmed", "not_reproduced", or "" (unverified)
+    verified: str = ""
+    verify_notes: str = ""
 
     def __post_init__(self) -> None:
         if self.type not in VALID_FINDING_TYPES:
@@ -53,6 +56,13 @@ class CrewResult:
         return [(r, f) for r in self.completed for f in r.findings]
 
     @property
+    def counted_findings(self) -> list[tuple[PersonaResult, Finding]]:
+        """Findings that count toward the grade: everything the verifier didn't refute."""
+        return [
+            (r, f) for r, f in self.all_findings if f.verified != "not_reproduced"
+        ]
+
+    @property
     def average_satisfaction(self) -> float | None:
         scores = [
             r.satisfaction_score
@@ -65,7 +75,7 @@ class CrewResult:
 
     def findings_by_severity(self) -> dict[str, int]:
         counts = {"critical": 0, "major": 0, "minor": 0}
-        for _, f in self.all_findings:
+        for _, f in self.counted_findings:
             counts[f.severity] += 1
         return counts
 

@@ -132,6 +132,9 @@ Rules for the report:
 - "severity" is one of: "critical", "major", "minor".
 - "satisfaction_score" is an integer 0-10 for how the session felt to THIS persona.
 - An empty "findings" list is a valid answer if the site genuinely gave you no trouble.
+- Before reporting anything as "critical", reload the page once and retry the
+  action cleanly. Only report it if it still fails, and mention the retry in
+  the description. Stay in character everywhere else — but bug claims must be real.
 """
 
 
