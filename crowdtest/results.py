@@ -69,6 +69,28 @@ class CrewResult:
             counts[f.severity] += 1
         return counts
 
+    def survival_score(self) -> int | None:
+        """0-100: how well the app survived the mob. None if nobody completed."""
+        if not self.completed:
+            return None
+        counts = self.findings_by_severity()
+        damage = 25 * counts["critical"] + 10 * counts["major"] + 3 * counts["minor"]
+        score = 100 - damage
+        avg = self.average_satisfaction
+        if avg is not None:
+            score = 0.7 * score + 0.3 * (avg * 10)
+        return max(0, min(100, round(score)))
+
+    def survival_grade(self) -> str | None:
+        """Letter grade S/A/B/C/D/F derived from the survival score."""
+        score = self.survival_score()
+        if score is None:
+            return None
+        for threshold, grade in ((95, "S"), (85, "A"), (70, "B"), (55, "C"), (40, "D")):
+            if score >= threshold:
+                return grade
+        return "F"
+
 
 def extract_report(final_text: str | None) -> dict:
     """Pull the JSON report out of an agent's final message.

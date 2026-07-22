@@ -12,6 +12,15 @@ from crowdtest.results import CrewResult
 SEVERITY_ORDER = {"critical": 0, "major": 1, "minor": 2}
 SEVERITY_EMOJI = {"critical": "🔴", "major": "🟠", "minor": "🟡"}
 
+GRADE_VERDICTS = {
+    "S": "the mob couldn't lay a finger on it",
+    "A": "survived with a few scratches",
+    "B": "walked away limping",
+    "C": "took real damage",
+    "D": "barely crawled out alive",
+    "F": "☠️ the mob destroyed it",
+}
+
 
 def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
     """Plain-Markdown report, good for terminals and PR comments."""
@@ -26,6 +35,13 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
         f"*Generated {ts} by [crowd-test](https://github.com/anhhuyn411-alt/crowd-test)*",
         "",
         "## Verdict",
+        "",
+        (
+            f"**🏆 Survival grade: {crew.survival_grade()} "
+            f"({crew.survival_score()}/100)** — {GRADE_VERDICTS[crew.survival_grade()]}"
+            if crew.survival_grade()
+            else "**Survival grade: n/a** — no persona completed their session"
+        ),
         "",
         f"- **Virtual users:** {len(crew.results)} sent, {len(crew.completed)} completed",
         f"- **Average satisfaction:** {avg_text}",
@@ -123,6 +139,7 @@ HTML_TEMPLATE = """<!doctype html>
   <div class="sub">{{ crew.url }} &middot; generated {{ generated_at }}</div>
 
   <div class="tiles">
+    <div class="tile"><b>{{ grade if grade else '–' }}</b><span>survival grade{% if score is not none %} · {{ score }}/100{% endif %}</span></div>
     <div class="tile"><b>{{ crew.results|length }}</b><span>virtual users sent</span></div>
     <div class="tile"><b>{{ avg_text }}</b><span>avg. satisfaction</span></div>
     <div class="tile"><b>{{ counts.critical }}</b><span>critical findings</span></div>
@@ -186,6 +203,8 @@ def build_html(crew: CrewResult, generated_at: str | None = None) -> str:
         counts=crew.findings_by_severity(),
         avg_text=f"{avg:.1f}" if avg is not None else "–",
         findings=findings,
+        grade=crew.survival_grade(),
+        score=crew.survival_score(),
     )
 
 

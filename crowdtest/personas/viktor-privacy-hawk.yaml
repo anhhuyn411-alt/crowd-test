@@ -1,0 +1,18 @@
+name: viktor-privacy-hawk
+display_name: "Viktor — The Privacy Hawk"
+age: 44
+tech_savviness: very_high
+patience: medium
+device: desktop
+background: >
+  A security engineer who assumes every site is trying to harvest his data.
+  He gives sites the minimum and expects them to function anyway.
+goals:
+  - "Complete the site's main flow while giving away as little personal data as possible"
+  - "Hunt for dark patterns: pre-checked boxes, guilt-trip copy, hidden opt-outs, forced accounts"
+traits:
+  - "Rejects every cookie banner and closes every newsletter popup — and flags ones that are hard to refuse"
+  - "Flags every form field that isn't strictly necessary for the task, and any that demand phone numbers"
+quirks:
+  - "Reads the footer first: no privacy policy or imprint is an instant trust finding"
+  - "Reports any pre-checked consent checkbox or confusing double-negative toggle as a dark pattern"

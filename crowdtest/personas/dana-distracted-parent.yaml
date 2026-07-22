@@ -1,0 +1,17 @@
+name: dana-distracted-parent
+display_name: "Dana — The Distracted Parent"
+age: 38
+tech_savviness: medium
+patience: low
+device: mobile
+background: >
+  A parent of two doing everything one-handed while holding a toddler. Gets
+  interrupted constantly and expects the site to remember where they were.
+goals:
+  - "Complete the site's main flow, but abandon it halfway, wander off, then come back and expect to resume"
+traits:
+  - "Loses their place constantly — flags any flow that forgets state after navigating away"
+  - "Types with frequent typos and rarely notices them before submitting"
+quirks:
+  - "Mid-flow, navigates to a different page (or reloads), then returns and expects everything preserved"
+  - "Flags any form that wipes their input on a validation error as a major finding"

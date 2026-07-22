@@ -1,29 +1,37 @@
-# crowd-test 🧑‍🤝‍🧑🤖
+# crowd-test 🔥
 
-**Hire a crowd of AI virtual users to test your app — before real users do.**
+**Let the mob loose on your app — before the internet does.**
 
-`crowd-test` sends a crew of AI personas — each with their own age, patience,
-tech skills, and quirks — into your website in real browsers. They actually
-*use* your app the way humans do: they get confused by unlabeled icons, rage-quit
-long checkouts, tab through your forms, and mash buttons to find race conditions.
-Then they hand you a report.
+The internet is not a QA lab. It's a mob: impatient, confused, distracted,
+skeptical, and occasionally feral. `crowd-test` recreates that mob out of AI
+personas and unleashes it on your website in real browsers. They rage-quit your
+checkout, get lost in your navigation, tab through your forms, reject your
+cookie banners, hunt for hidden fees, and mash your buttons looking for race
+conditions.
 
-It's a usability lab + QA team you can run from your terminal in minutes.
+Then they hand you the damage report — and a **survival grade**.
 
 ```
 pip install crowd-test
-crowd-test run https://your-app.com
+crowd-test run https://your-app.com --mob 20
 ```
+
+> 🏆 **Survival grade: C (61/100)** — took real damage
+
+Does your app survive the mob? Most don't on the first run.
 
 ## Why
 
 - **Unit tests** tell you your functions work.
 - **E2E tests** tell you your happy path works.
 - **crowd-test** tells you what happens when a 72-year-old, an impatient
-  shopper on mobile, a keyboard-only user, and a chaos monkey all hit your
-  app at once — the thing you currently only learn *after* launch.
+  shopper on 4G, a privacy hawk, a keyboard-only user, and a chaos monkey all
+  hit your app at once — the thing you currently learn *after* launch, from
+  one-star reviews.
 
-## The crowd
+## The mob
+
+Ten named ringleaders ship built-in. The rest of the mob is generated on demand.
 
 | Persona | Who they are | What they catch |
 |---|---|---|
@@ -32,8 +40,28 @@ crowd-test run https://your-app.com
 | ⌨️ **Kai — The Keyboard-Only User** | 35, navigates without a mouse | Focus traps, missing outlines, a11y blockers |
 | 👀 **Amara — The First-Time Visitor** | 31, zero context about you | Unclear value prop, buried pricing, jargon |
 | 🐒 **Rex — The Chaos Monkey** | 19, breaks things for fun | Edge cases, race conditions, raw error screens |
+| 🍼 **Dana — The Distracted Parent** | 38, one-handed, interrupted | Lost state, wiped forms, unforgiving flows |
+| 🕵️ **Viktor — The Privacy Hawk** | 44, gives you nothing | Dark patterns, forced accounts, data grabs |
+| 🌏 **Yuki — The Non-Native Speaker** | 26, literal English | Jargon, idiom buttons, US-only form formats |
+| 💰 **Penny — The Bargain Hunter** | 52, audits every cent | Hidden fees, price changes, silent coupon failures |
+| ⚡ **Sam — The Speedrunner** | 23, counts every click | Wasted steps, broken Enter keys, forced waits |
 
-Each persona is just a YAML file. Write your own in 20 lines:
+### Mob mode
+
+Ten not enough? Generate as many as you can afford:
+
+```bash
+crowd-test run https://your-app.com --mob 20              # ringleaders + 20 randoms
+crowd-test run https://your-app.com --personas none --mob 50 --seed 1   # pure reproducible mob
+```
+
+Every mob member gets a random age, patience level, tech skill, device, goal,
+and two behavioral quirks. No two runs of your app face the same crowd —
+unless you pin a `--seed` for CI.
+
+### Roll your own ringleader
+
+A persona is 20 lines of YAML:
 
 ```yaml
 name: grandma-linh
@@ -53,15 +81,30 @@ quirks:
 crowd-test run https://your-app.com --persona-file grandma-linh.yaml
 ```
 
+## The survival grade
+
+Every run ends with a verdict, computed from findings and mob satisfaction:
+
+| Grade | Meaning |
+|---|---|
+| **S** | the mob couldn't lay a finger on it |
+| **A** | survived with a few scratches |
+| **B** | walked away limping |
+| **C** | took real damage |
+| **D** | barely crawled out alive |
+| **F** | ☠️ the mob destroyed it |
+
+Add `--fail-on-critical` in CI to block the merge when the mob draws blood.
+
 ## Quick start
 
 ```bash
 pip install crowd-test
-playwright install chromium          # one-time browser download
 
 export ANTHROPIC_API_KEY=sk-...      # or OPENAI_API_KEY
 
-crowd-test run https://your-app.com                  # full crowd, 3 at a time
+crowd-test run https://your-app.com                  # the ten ringleaders
+crowd-test run https://your-app.com --mob 10         # plus ten randoms
 crowd-test run https://your-app.com --personas rex-chaos-monkey
 crowd-test run https://your-app.com --goal "Sign up and create a project"
 crowd-test list-personas
@@ -70,20 +113,18 @@ crowd-test list-personas
 You get:
 
 - **`report.md`** — findings ranked by severity, ready to paste into an issue or PR
-- **`report.html`** — a shareable dark-mode report with each persona's verdict,
-  satisfaction score, and in-character complaints
-
-Add `--fail-on-critical` in CI to fail the build when the crowd finds a critical issue.
+- **`report.html`** — a shareable dark-mode damage report with the survival
+  grade, each persona's verdict, and their in-character complaints
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A[Persona YAML] --> B[Persona compiler]
+    A[Persona YAML / mob generator] --> B[Persona compiler]
     B --> C[AI agent + real browser]
     C --> D[Your website]
     C --> E[Per-persona verdict JSON]
-    E --> F[Aggregated MD/HTML report]
+    E --> F[Survival grade + damage report]
 ```
 
 Each persona becomes a role-played AI agent (powered by
@@ -91,23 +132,27 @@ Each persona becomes a role-played AI agent (powered by
 Chromium instance. Personas run in parallel with isolated browser profiles, so
 their cookies and sessions never mix.
 
+**Point it only at apps you own or have permission to test.** The mob is for
+your own staging and production sites, not other people's.
+
 ## What it is not
 
-- Not a load-testing tool — a few personas, not thousands of requests.
-- Not a replacement for real user research — it's the cheap, fast layer *before* it.
+- Not a load-testing or stress tool — a mob of minds, not a flood of requests.
+- Not a replacement for real user research — it's the cheap, brutal layer *before* it.
 - Not a scripted E2E suite — runs are exploratory and slightly different every time.
   That's the point: humans are too.
 
 ## Roadmap
 
-- [ ] GitHub Action: the crowd tests your preview deploy and comments on the PR
+- [ ] GitHub Action: the mob tests your preview deploy and posts the survival grade on the PR
 - [ ] Screenshots attached to every finding
-- [ ] Persona marketplace: community-contributed personas in `personas/`
-- [ ] Score history: track UX score across releases
+- [ ] Survival badge for your README (`survived the mob: A`)
+- [ ] Persona marketplace: community-contributed ringleaders in `personas/`
+- [ ] Grade history: track your survival grade across releases
 
 ## Contributing
 
-The easiest and most fun contribution: **add a persona.** Send a PR with one
+The easiest and most fun contribution: **add a ringleader.** Send a PR with one
 YAML file to `crowdtest/personas/` and a row in the table above. Bug reports
 and feature ideas are welcome in issues.
 

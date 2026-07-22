@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import random
 from importlib import resources
 from pathlib import Path
 
@@ -149,6 +150,74 @@ def load_persona(path: str | Path) -> Persona:
 def builtin_persona_dir() -> Path:
     """Directory holding the personas shipped with the package."""
     return Path(resources.files("crowdtest")) / "personas"
+
+
+MOB_NAMES = [
+    "Alex", "Sam", "Jordan", "Riley", "Casey", "Morgan", "Quinn", "Avery",
+    "Rowan", "Skyler", "Linh", "Minh", "Anika", "Diego", "Fatima", "Kofi",
+    "Sofia", "Marco", "Priya", "Chen", "Nadia", "Omar", "Ingrid", "Tariq",
+]
+
+MOB_GOALS = [
+    "Complete the site's main flow (buy, sign up, contact — whatever it offers)",
+    "Figure out what this site is for and whether you would trust it with money",
+    "Find the site's pricing or main offer and judge whether it's worth it",
+    "Get help: find support, contact info, or an answer to a product question",
+    "Explore freely and try whatever catches your attention",
+]
+
+MOB_TRAITS = [
+    "Judges the site within seconds and says exactly why",
+    "Compares everything to the last similar site they used",
+    "Reads nothing longer than one sentence",
+    "Reads everything, including the fine print",
+    "Distrusts popups and closes them without reading",
+    "Follows every suggestion the site makes, obediently",
+    "Gets lost easily and blames themselves instead of the site",
+    "Gets lost easily and loudly blames the site",
+]
+
+MOB_QUIRKS = [
+    "Uses the back button constantly instead of in-site navigation",
+    "Opens interesting things expecting to come back later, then forgets",
+    "Fills forms in the wrong order, bottom to top",
+    "Hovers and hesitates before every click",
+    "Clicks first, reads later",
+    "Tries the search box for everything, even navigation",
+    "Ignores the navigation menu entirely and only clicks buttons",
+    "Double-checks every price and number for consistency",
+]
+
+
+def generate_mob(n: int, seed: int | None = None) -> list[Persona]:
+    """Generate *n* randomized virtual users — the mob.
+
+    A seed makes the mob reproducible, so a CI run can be replayed.
+    """
+    rng = random.Random(seed)
+    levels = sorted(VALID_LEVELS)
+    mob = []
+    for i in range(1, n + 1):
+        first = rng.choice(MOB_NAMES)
+        age = rng.randint(16, 79)
+        mob.append(
+            Persona(
+                name=f"mob-{i:03d}-{first.lower()}",
+                display_name=f"{first} — Mob #{i}",
+                age=age,
+                tech_savviness=rng.choice(levels),
+                patience=rng.choice(levels),
+                device=rng.choice(["desktop", "mobile"]),
+                background=(
+                    f"An ordinary {age}-year-old member of the mob. Nobody special "
+                    "— which is exactly why their problems are everyone's problems."
+                ),
+                goals=rng.sample(MOB_GOALS, k=rng.randint(1, 2)),
+                traits=rng.sample(MOB_TRAITS, k=2),
+                quirks=rng.sample(MOB_QUIRKS, k=2),
+            )
+        )
+    return mob
 
 
 def load_builtin_personas(names: list[str] | None = None) -> list[Persona]:

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from crowdtest.crew import run_crew
-from crowdtest.persona import load_builtin_personas, load_persona
+from crowdtest.persona import generate_mob, load_builtin_personas, load_persona
 from crowdtest.report import build_markdown, write_reports
 
 DEFAULT_MODELS = {
@@ -48,13 +48,15 @@ def collect_personas(args: argparse.Namespace):
     personas = []
     if args.persona_file:
         personas.extend(load_persona(p) for p in args.persona_file)
-    if args.personas == "all" and not args.persona_file:
+    if args.personas == "all" and not args.persona_file and not args.mob:
         personas.extend(load_builtin_personas())
-    elif args.personas and args.personas != "all":
+    elif args.personas not in ("all", "none"):
         names = [n.strip() for n in args.personas.split(",") if n.strip()]
         personas.extend(load_builtin_personas(names))
+    if args.mob:
+        personas.extend(generate_mob(args.mob, seed=args.seed))
     if not personas:
-        sys.exit("No personas selected. Use --personas all or --persona-file.")
+        sys.exit("No personas selected. Use --personas, --persona-file, or --mob N.")
     return personas
 
 
@@ -115,7 +117,18 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--personas",
         default="all",
-        help='comma-separated built-in persona names, or "all" (default)',
+        help='comma-separated built-in persona names, "all" (default), or "none"',
+    )
+    run.add_argument(
+        "--mob",
+        type=int,
+        metavar="N",
+        help="unleash N randomly generated virtual users on top of the selection",
+    )
+    run.add_argument(
+        "--seed",
+        type=int,
+        help="random seed for --mob, to make a mob reproducible",
     )
     run.add_argument(
         "--persona-file",

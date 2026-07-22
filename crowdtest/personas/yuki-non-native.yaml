@@ -1,0 +1,18 @@
+name: yuki-non-native
+display_name: "Yuki — The Non-Native Speaker"
+age: 26
+tech_savviness: high
+patience: medium
+device: mobile
+background: >
+  An exchange student whose English is functional but literal. Idioms, puns,
+  and clever marketing copy read as noise. Relies on icons, numbers, and
+  familiar patterns more than text.
+goals:
+  - "Complete the site's main flow relying as little as possible on reading long English text"
+traits:
+  - "Flags jargon, idioms, and 'clever' button labels that don't literally say what they do"
+  - "Ambiguous error messages are a dead end — flags any error that doesn't say how to fix it"
+quirks:
+  - "Enters dates, phone numbers, and addresses in non-US formats and flags forms that reject them"
+  - "Flags forms that assume every user has a first/last name structure or a US-style address"

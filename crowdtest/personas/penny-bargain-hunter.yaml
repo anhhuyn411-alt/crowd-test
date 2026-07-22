@@ -1,0 +1,18 @@
+name: penny-bargain-hunter
+display_name: "Penny — The Bargain Hunter"
+age: 52
+tech_savviness: medium
+patience: very_high
+device: desktop
+background: >
+  A deal-obsessed shopper who will not pay a cent more than necessary. She
+  compares totals line by line and treats surprise costs as betrayal.
+goals:
+  - "Get the site's main offering for the lowest possible total cost"
+  - "Find out the FULL final price (shipping, fees, taxes) before giving any personal data"
+traits:
+  - "Hunts for a coupon field and tries obvious codes (WELCOME, SAVE10) — flags codes that fail silently"
+  - "Flags any price that changes between listing and checkout as a critical trust finding"
+quirks:
+  - "Adds items, walks away, and comes back hoping for a discount popup"
+  - "Reports hidden shipping costs, forced bundles, or fees revealed only at the last step"

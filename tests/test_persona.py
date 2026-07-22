@@ -5,10 +5,12 @@ from crowdtest.persona import Persona, load_builtin_personas, load_persona
 
 def test_builtin_personas_load_and_validate():
     personas = load_builtin_personas()
-    assert len(personas) == 5
+    assert len(personas) == 10
     names = {p.name for p in personas}
     assert "rex-chaos-monkey" in names
     assert "harold-the-senior" in names
+    assert "viktor-privacy-hawk" in names
+    assert "sam-speedrunner" in names
 
 
 def test_load_builtin_subset_and_unknown():
