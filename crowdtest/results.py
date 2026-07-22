@@ -59,7 +59,9 @@ class CrewResult:
     def counted_findings(self) -> list[tuple[PersonaResult, Finding]]:
         """Findings that count toward the grade: everything the verifier didn't refute."""
         return [
-            (r, f) for r, f in self.all_findings if f.verified != "not_reproduced"
+            (r, f)
+            for r, f in self.all_findings
+            if f.verified not in ("not_reproduced", "disputed")
         ]
 
     @property

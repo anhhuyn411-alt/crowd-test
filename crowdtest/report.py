@@ -61,6 +61,11 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
                 badge = " ✅ *verified by detective*"
             elif f.verified == "not_reproduced":
                 badge = " ⚠️ *could not be reproduced — excluded from grade*"
+            elif f.verified == "disputed":
+                badge = (
+                    " 🔬 *disputed by cross-engine probe — likely automation "
+                    "artifact, excluded from grade*"
+                )
             lines.append(
                 f"- {emoji} **[{f.severity}/{f.type}] {f.title}**{badge}"
                 f" — {f.description} _(found by {result.display_name}"
@@ -159,7 +164,7 @@ HTML_TEMPLATE = """<!doctype html>
     <div class="finding {{ f.severity }}">
       <div class="meta">{{ f.severity }} &middot; {{ f.type }}
         {% if f.where %} &middot; {{ f.where }}{% endif %}
-        {% if f.verified == 'confirmed' %} &middot; ✅ verified{% elif f.verified == 'not_reproduced' %} &middot; ⚠️ not reproduced — excluded from grade{% endif %}</div>
+        {% if f.verified == 'confirmed' %} &middot; ✅ verified{% elif f.verified == 'not_reproduced' %} &middot; ⚠️ not reproduced — excluded from grade{% elif f.verified == 'disputed' %} &middot; 🔬 disputed by cross-engine probe — excluded from grade{% endif %}</div>
       <strong>{{ f.title }}</strong>
       <div>{{ f.description }}</div>
       {% if f.verify_notes %}<div class="meta" style="margin-top:.3rem">detective: {{ f.verify_notes }}</div>{% endif %}

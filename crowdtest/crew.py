@@ -6,6 +6,7 @@ import asyncio
 from typing import Callable
 
 from crowdtest.persona import Persona
+from crowdtest.probe import cross_probe
 from crowdtest.results import CrewResult, PersonaResult
 from crowdtest.runner import LLMFactory, run_persona
 from crowdtest.verify import verify_finding
@@ -25,6 +26,7 @@ async def run_crew(
     max_steps: int = 25,
     concurrency: int = 3,
     verify: bool = False,
+    cross: bool = False,
     on_progress: ProgressHook | None = None,
 ) -> CrewResult:
     """Run every persona through the site, at most *concurrency* at a time.
@@ -61,6 +63,14 @@ async def run_crew(
                     await verify_finding(
                         finding, url, llm_factory, headless=headless
                     )
+                    # The probe is independent of the detective: it must run
+                    # even when the detective is inconclusive, because a stack
+                    # artifact blinds the detective and the mob alike. Only a
+                    # clean refutation makes a second opinion unnecessary.
+                    if cross and finding.verified != "not_reproduced":
+                        await cross_probe(
+                            finding, url, llm_factory, headless=headless
+                        )
                     if on_progress:
                         on_progress(
                             f"verify: {finding.title[:40]}",

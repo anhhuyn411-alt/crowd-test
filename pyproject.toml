@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "crowd-test"
-version = "0.3.0"
+version = "0.4.0"
 description = "Hire a crowd of AI virtual users to test your web app in minutes"
 readme = "README.md"
 license = { text = "MIT" }
@@ -28,6 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+probe = ["playwright>=1.40"]
 
 [project.urls]
 Homepage = "https://github.com/anhhuyn411-alt/crowd-test"

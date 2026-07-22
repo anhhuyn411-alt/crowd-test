@@ -85,7 +85,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             headless=not args.headed,
             max_steps=args.max_steps,
             concurrency=args.concurrency,
-            verify=args.verify,
+            verify=args.verify or args.cross_verify,
+            cross=args.cross_verify,
             on_progress=on_progress,
         )
     )
@@ -161,6 +162,10 @@ def build_parser() -> argparse.ArgumentParser:
                      help="send an independent detective agent to reproduce every "
                           "critical/major finding; refuted ones stop counting "
                           "toward the survival grade")
+    run.add_argument("--cross-verify", action="store_true",
+                     help="like --verify, plus re-check confirmed findings in a "
+                          "second independent browser engine (Playwright); needs "
+                          "pip install crowd-test[probe]")
     run.add_argument("--headed", action="store_true",
                      help="show browser windows instead of headless")
     run.add_argument("--out", default="crowd-test-reports",

@@ -16,9 +16,9 @@ pip install crowd-test
 crowd-test run https://your-app.com --mob 20
 ```
 
-> 🏆 **Survival grade: C (61/100)** — took real damage
-
 Does your app survive the mob? Most don't on the first run.
+
+![Sample crowd-test damage report](docs/sample-report.png)
 
 ## Why
 
