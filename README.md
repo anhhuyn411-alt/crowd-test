@@ -1,9 +1,9 @@
-# crowd-test 🧑‍🤝‍🧑🤖
+﻿# crowd-test ðŸ§‘â€ðŸ¤â€ðŸ§‘ðŸ¤–
 
-**Hire a crowd of AI virtual users to test your app — before real users do.**
+**Hire a crowd of AI virtual users to test your app â€” before real users do.**
 
-`crowd-test` sends a crew of AI personas — each with their own age, patience,
-tech skills, and quirks — into your website in real browsers. They actually
+`crowd-test` sends a crew of AI personas â€” each with their own age, patience,
+tech skills, and quirks â€” into your website in real browsers. They actually
 *use* your app the way humans do: they get confused by unlabeled icons, rage-quit
 long checkouts, tab through your forms, and mash buttons to find race conditions.
 Then they hand you a report.
@@ -21,23 +21,23 @@ crowd-test run https://your-app.com
 - **E2E tests** tell you your happy path works.
 - **crowd-test** tells you what happens when a 72-year-old, an impatient
   shopper on mobile, a keyboard-only user, and a chaos monkey all hit your
-  app at once — the thing you currently only learn *after* launch.
+  app at once â€” the thing you currently only learn *after* launch.
 
 ## The crowd
 
 | Persona | Who they are | What they catch |
 |---|---|---|
-| 🕐 **Mai — The Impatient Shopper** | 28, mobile, zero patience | Long flows, slow feedback, needless form fields |
-| 👴 **Harold — The Senior Citizen** | 72, barely uses computers | Unlabeled icons, tiny text, confusing conventions |
-| ⌨️ **Kai — The Keyboard-Only User** | 35, navigates without a mouse | Focus traps, missing outlines, a11y blockers |
-| 👀 **Amara — The First-Time Visitor** | 31, zero context about you | Unclear value prop, buried pricing, jargon |
-| 🐒 **Rex — The Chaos Monkey** | 19, breaks things for fun | Edge cases, race conditions, raw error screens |
+| ðŸ• **Mai â€” The Impatient Shopper** | 28, mobile, zero patience | Long flows, slow feedback, needless form fields |
+| ðŸ‘´ **Harold â€” The Senior Citizen** | 72, barely uses computers | Unlabeled icons, tiny text, confusing conventions |
+| âŒ¨ï¸ **Kai â€” The Keyboard-Only User** | 35, navigates without a mouse | Focus traps, missing outlines, a11y blockers |
+| ðŸ‘€ **Amara â€” The First-Time Visitor** | 31, zero context about you | Unclear value prop, buried pricing, jargon |
+| ðŸ’ **Rex â€” The Chaos Monkey** | 19, breaks things for fun | Edge cases, race conditions, raw error screens |
 
 Each persona is just a YAML file. Write your own in 20 lines:
 
 ```yaml
 name: grandma-linh
-display_name: "Linh — Skeptical Grandmother"
+display_name: "Linh â€” Skeptical Grandmother"
 age: 68
 tech_savviness: very_low
 patience: medium
@@ -69,8 +69,8 @@ crowd-test list-personas
 
 You get:
 
-- **`report.md`** — findings ranked by severity, ready to paste into an issue or PR
-- **`report.html`** — a shareable dark-mode report with each persona's verdict,
+- **`report.md`** â€” findings ranked by severity, ready to paste into an issue or PR
+- **`report.html`** â€” a shareable dark-mode report with each persona's verdict,
   satisfaction score, and in-character complaints
 
 Add `--fail-on-critical` in CI to fail the build when the crowd finds a critical issue.
@@ -93,9 +93,9 @@ their cookies and sessions never mix.
 
 ## What it is not
 
-- Not a load-testing tool — a few personas, not thousands of requests.
-- Not a replacement for real user research — it's the cheap, fast layer *before* it.
-- Not a scripted E2E suite — runs are exploratory and slightly different every time.
+- Not a load-testing tool â€” a few personas, not thousands of requests.
+- Not a replacement for real user research â€” it's the cheap, fast layer *before* it.
+- Not a scripted E2E suite â€” runs are exploratory and slightly different every time.
   That's the point: humans are too.
 
 ## Roadmap
@@ -112,7 +112,7 @@ YAML file to `crowdtest/personas/` and a row in the table above. Bug reports
 and feature ideas are welcome in issues.
 
 ```bash
-git clone https://github.com/anhhuyn411/crowd-test
+git clone https://github.com/anhhuyn411-alt/crowd-test
 cd crowd-test
 pip install -e .[dev]
 pytest
