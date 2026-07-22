@@ -1,4 +1,4 @@
-﻿"""Turn a CrewResult into shareable Markdown and HTML reports."""
+"""Turn a CrewResult into shareable Markdown and HTML reports."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from jinja2 import Environment, BaseLoader
 from crowdtest.results import CrewResult
 
 SEVERITY_ORDER = {"critical": 0, "major": 1, "minor": 2}
-SEVERITY_EMOJI = {"critical": "ðŸ”´", "major": "ðŸŸ ", "minor": "ðŸŸ¡"}
+SEVERITY_EMOJI = {"critical": "🔴", "major": "🟠", "minor": "🟡"}
 
 
 def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
@@ -21,7 +21,7 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
     avg_text = f"{avg:.1f}/10" if avg is not None else "n/a"
 
     lines = [
-        f"# crowd-test report â€” {crew.url}",
+        f"# crowd-test report — {crew.url}",
         "",
         f"*Generated {ts} by [crowd-test](https://github.com/anhhuyn411-alt/crowd-test)*",
         "",
@@ -42,13 +42,13 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
             emoji = SEVERITY_EMOJI[f.severity]
             lines.append(
                 f"- {emoji} **[{f.severity}/{f.type}] {f.title}**"
-                f" â€” {f.description} _(found by {result.display_name}"
+                f" — {f.description} _(found by {result.display_name}"
                 + (f", at: {f.where}" if f.where else "")
                 + ")_"
             )
         lines.append("")
     else:
-        lines += ["## Findings", "", "No findings â€” the crowd had a smooth ride. ðŸŽ‰", ""]
+        lines += ["## Findings", "", "No findings — the crowd had a smooth ride. 🎉", ""]
 
     lines += ["## The crowd", ""]
     for r in crew.results:
@@ -60,14 +60,14 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
             )
             goal = "achieved their goal" if r.goal_achieved else "gave up on their goal"
             lines += [
-                f"### {r.display_name} â€” {score}, {goal}",
+                f"### {r.display_name} — {score}, {goal}",
                 "",
                 f"> {r.summary}" if r.summary else "> (no summary)",
                 "",
             ]
         else:
             lines += [
-                f"### {r.display_name} â€” session failed",
+                f"### {r.display_name} — session failed",
                 "",
                 "```",
                 r.error.strip(),
@@ -82,7 +82,7 @@ HTML_TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>crowd-test â€” {{ crew.url }}</title>
+<title>crowd-test — {{ crew.url }}</title>
 <style>
   :root { --bg:#0f1117; --card:#1a1d27; --text:#e6e8ee; --muted:#9aa0b0;
           --critical:#ff5470; --major:#ffb454; --minor:#ffe27a; --ok:#3ddc97; }
@@ -142,7 +142,7 @@ HTML_TEMPLATE = """<!doctype html>
     </div>
     {% endfor %}
   {% else %}
-    <p>No findings â€” the crowd had a smooth ride. ðŸŽ‰</p>
+    <p>No findings &mdash; the crowd had a smooth ride. 🎉</p>
   {% endif %}
 
   <h2>The crowd</h2>
@@ -150,21 +150,21 @@ HTML_TEMPLATE = """<!doctype html>
   <div class="persona">
     {% if r.ok %}
       <span class="score {{ 'good' if (r.satisfaction_score or 0) >= 7 else ('bad' if (r.satisfaction_score or 0) <= 4 else '') }}">
-        {{ r.satisfaction_score if r.satisfaction_score is not none else 'â€“' }}/10</span>
+        {{ r.satisfaction_score if r.satisfaction_score is not none else '&ndash;' }}/10</span>
       <strong>{{ r.display_name }}</strong>
       <div class="sub" style="margin:0">
         {{ 'achieved their goal' if r.goal_achieved else 'gave up on their goal' }}{% if r.duration_s %} &middot; {{ r.duration_s }}s{% endif %}{% if r.steps %} &middot; {{ r.steps }} steps{% endif %}
       </div>
       {% if r.summary %}<blockquote>&ldquo;{{ r.summary }}&rdquo;</blockquote>{% endif %}
     {% else %}
-      <strong>{{ r.display_name }}</strong> â€” session failed
+      <strong>{{ r.display_name }}</strong> &mdash; session failed
       <div class="error">{{ r.error }}</div>
     {% endif %}
   </div>
   {% endfor %}
 
   <footer>made with <a href="https://github.com/anhhuyn411-alt/crowd-test">crowd-test</a>
-    â€” hire a crowd of AI users to test your app</footer>
+    &mdash; hire a crowd of AI users to test your app</footer>
 </div>
 </body>
 </html>
@@ -184,7 +184,7 @@ def build_html(crew: CrewResult, generated_at: str | None = None) -> str:
         crew=crew,
         generated_at=ts,
         counts=crew.findings_by_severity(),
-        avg_text=f"{avg:.1f}" if avg is not None else "â€“",
+        avg_text=f"{avg:.1f}" if avg is not None else "–",
         findings=findings,
     )
 
