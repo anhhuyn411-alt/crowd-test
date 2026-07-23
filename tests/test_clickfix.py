@@ -10,14 +10,15 @@ import pytest
 
 import crowdtest.clickfix as clickfix
 from crowdtest.clickfix import ensure_reliable_clicks
-from crowdtest.runner import _salvage_report
+from crowdtest.runner import _history_digest, _salvage_report
 
 
 class FakeCDP:
     """Records CDP traffic and scripts the witness answers."""
 
-    def __init__(self, witness_saw_click: bool):
+    def __init__(self, witness_saw_click: bool, field_value: str = ""):
         self.witness_saw_click = witness_saw_click
+        self.field_value = field_value
         self.token = None
         self.calls = []
         self.session_id = "sess"
@@ -43,6 +44,13 @@ class FakeCDP:
         return {"result": {"value": f'["{self.token}",{seen}]'}}
 
     async def _call_function_on(self, params, session_id=None):
+        decl = params["functionDeclaration"]
+        if "dispatchEvent(new Event('input'" in decl:
+            self.calls.append("js_type")
+            return {}
+        if "String(this.value" in decl:  # the value read-back probe
+            self.calls.append("read_value")
+            return {"result": {"value": self.field_value}}
         self.calls.append("js_click")
         return {}
 
@@ -62,24 +70,31 @@ def make_node(tag="button", type_=""):
 
 @pytest.fixture()
 def patched_watchdog(monkeypatch):
-    """Apply the patch against a stubbed original impl; undo everything after."""
+    """Apply the patch against stubbed original impls; undo everything after."""
     from browser_use.browser.watchdogs.default_action_watchdog import (
         DefaultActionWatchdog,
     )
 
     original_calls = []
 
-    async def fake_original(self, element_node):
+    async def fake_click(self, element_node):
         original_calls.append(element_node.tag_name)
         return {"from": "original"}
 
-    saved = DefaultActionWatchdog._click_element_node_impl
+    async def fake_type(self, element_node, text, clear=True, is_sensitive=False):
+        original_calls.append(f"type:{text}")
+        return {"from": "original-type"}
+
+    saved_click = DefaultActionWatchdog._click_element_node_impl
+    saved_type = DefaultActionWatchdog._input_text_element_node_impl
+    monkeypatch.setattr(DefaultActionWatchdog, "_click_element_node_impl", fake_click)
     monkeypatch.setattr(
-        DefaultActionWatchdog, "_click_element_node_impl", fake_original
+        DefaultActionWatchdog, "_input_text_element_node_impl", fake_type
     )
     monkeypatch.setattr(clickfix, "_patched", False)
     yield DefaultActionWatchdog, original_calls
-    DefaultActionWatchdog._click_element_node_impl = saved
+    DefaultActionWatchdog._click_element_node_impl = saved_click
+    DefaultActionWatchdog._input_text_element_node_impl = saved_type
 
 
 def make_self(cdp):
@@ -147,6 +162,50 @@ async def test_select_elements_still_use_upstream_handling(
     assert original_calls == ["select"]
     assert result == {"from": "original"}
     assert cdp.calls == []
+
+
+async def test_typed_text_that_arrived_is_left_alone(monkeypatch, patched_watchdog):
+    watchdog, original_calls = patched_watchdog
+    monkeypatch.delenv("CROWDTEST_CLICK_MODE", raising=False)
+    await ensure_reliable_clicks()
+
+    cdp = FakeCDP(witness_saw_click=True, field_value="hello world")
+    result = await watchdog._input_text_element_node_impl(
+        make_self(cdp), make_node(tag="input"), "hello", clear=True
+    )
+    assert original_calls == ["type:hello"]
+    assert result == {"from": "original-type"}
+    assert "js_type" not in cdp.calls
+
+
+async def test_swallowed_typing_is_reset_via_js(monkeypatch, patched_watchdog):
+    watchdog, original_calls = patched_watchdog
+    monkeypatch.delenv("CROWDTEST_CLICK_MODE", raising=False)
+    await ensure_reliable_clicks()
+
+    cdp = FakeCDP(witness_saw_click=True, field_value="")  # field stayed empty
+    result = await watchdog._input_text_element_node_impl(
+        make_self(cdp), make_node(tag="input"), "hello", clear=True
+    )
+    assert original_calls == ["type:hello"]
+    assert "js_type" in cdp.calls
+    assert result is None
+
+
+def test_history_digest_collects_thoughts_and_content():
+    history = SimpleNamespace(
+        model_thoughts=lambda: [
+            SimpleNamespace(
+                evaluation_previous_goal="clicked login",
+                memory="cart is broken",
+                next_goal="give up",
+            )
+        ],
+        extracted_content=lambda: ["Clicked button add-to-cart"],
+    )
+    digest = _history_digest(history)
+    assert "cart is broken" in digest
+    assert "Clicked button add-to-cart" in digest
 
 
 async def test_salvage_report_converts_prose_via_llm():

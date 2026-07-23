@@ -1,23 +1,27 @@
-"""Make every click land, even where CDP mouse events silently vanish.
+"""Make every click and keystroke land, even where CDP input silently vanishes.
 
 On some machines (observed on Windows with Chrome 149/150 headless), the
-``Input.dispatchMouseEvent`` commands browser-use issues for clicks are
-acknowledged by Chromium but never delivered to the page — reliably so after
-the first click-initiated navigation on a real site. Typing works, JavaScript
-works — only synthetic mouse clicks vanish. The result is poison for a
-testing tool: every persona unanimously convicts every button on the site as
-broken, because from where they stand every button IS broken.
+``Input.dispatch*Event`` commands browser-use issues are acknowledged by
+Chromium but never delivered to the page — reliably so after the first
+click-initiated navigation on a real site. JavaScript keeps working — only
+synthetic input vanishes. The result is poison for a testing tool: every
+persona unanimously convicts every button and form on the site as broken,
+because from where they stand they ARE broken.
 
-Guessing which environments are affected is a losing game, so we don't:
-every click gets a witness. Before browser-use dispatches its coordinate
-click we plant a one-shot capture listener in the page; afterwards we ask it
-whether any mousedown/click arrived (a page navigation also counts — the
-click clearly landed). If nothing arrived, we re-fire the click as a
-synthesized DOM event sequence (pointerdown → mousedown → pointerup →
-mouseup → click()), which is delivered even where CDP input is not.
+Guessing which environments are affected is a losing game, so we don't —
+every interaction gets verified:
+
+- **Clicks**: before browser-use dispatches its coordinate click we plant a
+  one-shot capture listener in the page; afterwards we ask it whether any
+  mousedown/click arrived (a page navigation also counts — the click clearly
+  landed). If nothing arrived, the click is re-fired as a synthesized DOM
+  event sequence (pointerdown → mousedown → pointerup → mouseup → click()).
+- **Typing**: after browser-use types, we read the field's actual value; if
+  the text never arrived, we set it through the framework-native value setter
+  and dispatch input/change events.
 
 Override with ``CROWDTEST_CLICK_MODE``: ``auto`` (default, verify + fallback),
-``js`` (always synthesize DOM events, skip CDP clicks), or ``cdp`` (leave
+``js`` (always synthesize DOM events, skip CDP input), or ``cdp`` (leave
 browser-use untouched).
 """
 
@@ -53,6 +57,34 @@ function() {
   this.dispatchEvent(new PointerEvent('pointerup', o));
   this.dispatchEvent(new MouseEvent('mouseup', o));
   this.click();
+}
+"""
+
+_JS_READ_VALUE = """
+function() {
+  const t = (this.tagName || '').toLowerCase();
+  if (t === 'input' || t === 'textarea') return String(this.value ?? '');
+  return String(this.textContent ?? '');
+}
+"""
+
+# Set the value through the native setter so frameworks that hijack the value
+# property (React does) see the change, then announce it like a user would.
+_JS_TYPE = """
+function(text, clear) {
+  this.focus();
+  const t = (this.tagName || '').toLowerCase();
+  if (t === 'input' || t === 'textarea') {
+    const proto = t === 'textarea'
+      ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    const v = clear ? text : String(this.value ?? '') + text;
+    if (desc && desc.set) desc.set.call(this, v); else this.value = v;
+  } else if (this.isContentEditable) {
+    this.textContent = clear ? text : String(this.textContent ?? '') + text;
+  }
+  this.dispatchEvent(new Event('input', {bubbles: true}));
+  this.dispatchEvent(new Event('change', {bubbles: true}));
 }
 """
 
@@ -112,8 +144,40 @@ def _apply_click_patch(js_only: bool = False) -> None:
         await _js_click(cdp_session, element_node)
         return None
 
+    original_type = DefaultActionWatchdog._input_text_element_node_impl
+
+    async def witnessed_type_impl(
+        self, element_node, text, clear=True, is_sensitive=False
+    ):
+        cdp_session = await self.browser_session.cdp_client_for_node(element_node)
+
+        if not js_only:
+            result = None
+            try:
+                result = await original_type(
+                    self, element_node, text, clear=clear, is_sensitive=is_sensitive
+                )
+            except Exception:
+                pass  # fall through to the JS path
+            else:
+                value = await _call_on_node(cdp_session, element_node, _JS_READ_VALUE)
+                if value is None or _typed_text_arrived(value, text, clear):
+                    return result
+            logger.debug("CDP typing was not delivered - setting value via JS")
+
+        await _js_type(cdp_session, element_node, text, clear)
+        return None
+
     DefaultActionWatchdog._click_element_node_impl = witnessed_click_impl
+    DefaultActionWatchdog._input_text_element_node_impl = witnessed_type_impl
     _patched = True
+
+
+def _typed_text_arrived(value: str, text: str, clear: bool) -> bool:
+    """Did the field end up holding what the user typed?"""
+    if not text:
+        return value == "" if clear else True
+    return text in str(value)
 
 
 async def _evaluate(cdp_session, expression: str):
@@ -128,8 +192,7 @@ async def _evaluate(cdp_session, expression: str):
         return None
 
 
-async def _js_click(cdp_session, element_node) -> None:
-    """Deliver a click as a synthesized DOM event sequence on the node."""
+async def _resolve_object_id(cdp_session, element_node) -> str:
     try:
         await cdp_session.cdp_client.send.DOM.scrollIntoViewIfNeeded(
             params={"backendNodeId": element_node.backend_node_id},
@@ -141,9 +204,46 @@ async def _js_click(cdp_session, element_node) -> None:
         params={"backendNodeId": element_node.backend_node_id},
         session_id=cdp_session.session_id,
     )
-    object_id = result["object"]["objectId"]
+    return result["object"]["objectId"]
+
+
+async def _call_on_node(cdp_session, element_node, declaration: str, args=()):
+    """Call a JS function on the node; None means the call didn't go through."""
+    try:
+        object_id = await _resolve_object_id(cdp_session, element_node)
+        res = await cdp_session.cdp_client.send.Runtime.callFunctionOn(
+            params={
+                "functionDeclaration": declaration,
+                "objectId": object_id,
+                "arguments": [{"value": a} for a in args],
+                "returnByValue": True,
+            },
+            session_id=cdp_session.session_id,
+        )
+        return res.get("result", {}).get("value")
+    except Exception:
+        return None
+
+
+async def _js_click(cdp_session, element_node) -> None:
+    """Deliver a click as a synthesized DOM event sequence on the node."""
+    object_id = await _resolve_object_id(cdp_session, element_node)
     await cdp_session.cdp_client.send.Runtime.callFunctionOn(
         params={"functionDeclaration": _JS_CLICK, "objectId": object_id},
+        session_id=cdp_session.session_id,
+    )
+    await asyncio.sleep(0.05)
+
+
+async def _js_type(cdp_session, element_node, text: str, clear: bool) -> None:
+    """Set the field's value via JS and announce it with input/change events."""
+    object_id = await _resolve_object_id(cdp_session, element_node)
+    await cdp_session.cdp_client.send.Runtime.callFunctionOn(
+        params={
+            "functionDeclaration": _JS_TYPE,
+            "objectId": object_id,
+            "arguments": [{"value": text}, {"value": bool(clear)}],
+        },
         session_id=cdp_session.session_id,
     )
     await asyncio.sleep(0.05)
