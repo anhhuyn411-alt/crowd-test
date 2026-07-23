@@ -7,10 +7,33 @@ import time
 import traceback
 from typing import Any, Callable
 
+from crowdtest.clickfix import ensure_reliable_clicks
 from crowdtest.persona import Persona
 from crowdtest.results import PersonaResult, extract_report, parse_persona_report
 
 LLMFactory = Callable[[], Any]
+
+SALVAGE_PROMPT = """The message below is a QA persona's final report after testing
+a website. It was supposed to be ONLY a JSON object with this exact shape:
+
+{{
+  "goal_achieved": true or false,
+  "satisfaction_score": integer 0-10,
+  "summary": "one short paragraph",
+  "findings": [
+    {{"type": "bug|ux|accessibility|performance|content",
+      "severity": "critical|major|minor",
+      "title": "...", "description": "...", "where": "..."}}
+  ]
+}}
+
+Convert the message into exactly that JSON object, preserving its meaning.
+Only include findings the message actually claims; an empty list is valid.
+Reply with ONLY the JSON object, no prose.
+
+Message:
+{message}
+"""
 
 # browser-use ships convenience extensions (ad blocking, cookie-banner
 # auto-dismissal, URL cleaning). A testing tool must show personas the page as
@@ -41,6 +64,8 @@ async def run_persona(
         persona_name=persona.name, display_name=persona.display_name, ok=False
     )
 
+    await ensure_reliable_clicks(headless=headless)
+
     browser = Browser(headless=headless)
     try:
         agent = Agent(
@@ -51,7 +76,14 @@ async def run_persona(
         history = await agent.run(max_steps=max_steps)
 
         result.steps = _safe_call(history, "number_of_steps")
-        report = extract_report(_safe_call(history, "final_result"))
+        final_text = _safe_call(history, "final_result")
+        try:
+            report = extract_report(final_text)
+        except ValueError:
+            # Models sometimes sign off with prose instead of the JSON report.
+            # One conversion call salvages the session instead of discarding
+            # everything the persona observed (and the tokens it burned).
+            report = await _salvage_report(final_text, llm_factory)
         (
             result.goal_achieved,
             result.satisfaction_score,
@@ -68,6 +100,19 @@ async def run_persona(
         except Exception:
             pass
     return result
+
+
+async def _salvage_report(final_text: str | None, llm_factory: LLMFactory) -> dict:
+    """Turn a prose final answer into the report dict via one LLM call."""
+    if not final_text or not final_text.strip():
+        raise ValueError("agent produced no final answer")
+    from browser_use.llm.messages import UserMessage
+
+    llm = llm_factory()
+    response = await llm.ainvoke(
+        [UserMessage(content=SALVAGE_PROMPT.format(message=final_text[:8000]))]
+    )
+    return extract_report(response.completion)
 
 
 def _safe_call(obj: Any, method: str) -> Any:

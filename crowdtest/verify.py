@@ -59,6 +59,10 @@ async def verify_finding(
     """
     from browser_use import Agent, Browser
 
+    from crowdtest.clickfix import ensure_reliable_clicks
+
+    await ensure_reliable_clicks(headless=headless)
+
     browser = Browser(headless=headless)
     try:
         agent = Agent(

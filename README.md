@@ -140,7 +140,10 @@ pip install git+https://github.com/microsoft/Webwright   # --tribunal
 
 Note that crowd-test runs the mob's browser with automation extensions
 disabled so personas see your site exactly as real users do — cookie banners
-and all.
+and all. Every click is also verified against the page and re-delivered as
+DOM events if the automation stack swallowed it (some Windows + headless
+Chrome combos do) — so a glitchy stack doesn't turn into a mob of false
+accusations against your buttons.
 
 ## Quick start
 
