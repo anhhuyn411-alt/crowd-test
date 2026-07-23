@@ -96,12 +96,17 @@ def build_markdown(crew: CrewResult, generated_at: str | None = None) -> str:
             lines += [
                 f"### {r.display_name} — session failed",
                 "",
-                "```",
-                r.error.strip(),
-                "```",
+                f"`{short_error(r.error)}`",
                 "",
             ]
     return "\n".join(lines)
+
+
+def short_error(error: str) -> str:
+    """Condense a traceback to its final meaningful line for the report."""
+    lines = [line.strip() for line in (error or "").strip().splitlines()]
+    lines = [line for line in lines if line]
+    return lines[-1] if lines else "unknown error"
 
 
 HTML_TEMPLATE = """<!doctype html>
@@ -188,7 +193,7 @@ HTML_TEMPLATE = """<!doctype html>
       {% if r.summary %}<blockquote>&ldquo;{{ r.summary }}&rdquo;</blockquote>{% endif %}
     {% else %}
       <strong>{{ r.display_name }}</strong> &mdash; session failed
-      <div class="error">{{ r.error }}</div>
+      <div class="error">{{ short_error(r.error) }}</div>
     {% endif %}
   </div>
   {% endfor %}
@@ -218,6 +223,7 @@ def build_html(crew: CrewResult, generated_at: str | None = None) -> str:
         findings=findings,
         grade=crew.survival_grade(),
         score=crew.survival_score(),
+        short_error=short_error,
     )
 
 
