@@ -1,6 +1,6 @@
 """crowd-test: hire a crowd of AI virtual users to test your web app."""
 
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 
 from crowdtest.persona import (
     Persona,
