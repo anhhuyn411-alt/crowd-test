@@ -1,18 +1,18 @@
 # Launch playbook (internal — not part of the product docs)
 
-## Pre-launch checklist
+Status 2026-07-23: core v0.5.0 + crowd-test-mcp v0.1.0 both live on PyPI,
+CI green, README image renders, awesome-claude-skills PR #1412 open.
+The only missing asset is a real demo run (blocked on API credits) — launch
+can go without it; post the GIF in replies later.
 
-- [ ] PyPI publish live (`pip install crowd-test` works on a clean machine)
-- [ ] README demo image renders on GitHub
-- [ ] CI green on main
-- [ ] One real-world report you're allowed to share (your own site)
+## Show HN (the main event)
 
-## Show HN
+**Title (78 chars max, no emoji, no exclamation):**
+> Show HN: Crowd-test – a mob of AI personas attacks your site, 3 engines verify
 
-**Title:**
-> Show HN: Crowd-test – unleash a mob of AI personas on your web app
+**URL:** https://github.com/anhhuyn411-alt/crowd-test
 
-**Body draft:**
+**Body:**
 
 I built crowd-test because every launch taught me the same lesson: unit tests
 pass, E2E tests pass, and then real users immediately hit problems no test
@@ -24,26 +24,44 @@ longer than 3 steps, a keyboard-only user, a privacy hawk who rejects every
 banner, and a chaos monkey typing emoji into your forms. Each reports findings
 in character, and your app gets a survival grade from S to F.
 
-Two design decisions I think are interesting:
+The part I think is genuinely interesting: verification. Persona agents are
+dramatic by design, and worse — browser automation itself sometimes glitches,
+and then every agent on the same stack hallucinates the same bug. This
+happened to me on day one: the whole mob unanimously convicted an innocent
+add-to-cart button, because the automation layer was eating the clicks. The
+site was fine.
 
-1. Findings are adversarially verified. Persona agents are dramatic by design,
-   so every critical accusation goes to a "detective" agent that tries to
-   reproduce it — and optionally to a cross-engine probe in a second browser
-   stack, which catches false positives caused by the automation layer itself
-   (this happened to me in testing; the mob unanimously convicted an innocent
-   button).
+So findings face a tribunal of up to three independent harnesses before they
+count: a skeptical detective agent (same stack, no persona), a declarative
+repro script executed by raw Playwright (different stack — this one catches
+the automation artifacts), and optionally a Microsoft Webwright agent as a
+third opinion. A bug only bleeds your grade when an independent engine
+reproduces it.
 
-2. Personas are 20-line YAML files. The dream is a community folder of
-   ringleaders — "skeptical grandmother", "user on a broken trackpad" — that
-   you can throw at your app.
+Personas are 20-line YAML files — the dream is a community folder of
+ringleaders ("skeptical grandmother", "user on a broken trackpad"). There's
+also a Claude Code skill and an MCP server (crowd-test-mcp) so your coding
+agent can run the mob and read the report itself.
 
 MIT licensed, built on browser-use. Bring your own Anthropic/OpenAI key.
+Honest limitations: it's not load testing, it's not a replacement for real
+user research, and LLM costs are yours.
+
+**First comment (post immediately, from your account):** nothing — save the
+phantom-click forensics story details, cost numbers ("a 10-persona run costs
+roughly $X with Sonnet"), and the sample report link for replies.
 
 ## Product Hunt
 
+- **Name:** crowd-test
 - **Tagline:** Your app, versus a mob of AI users
-- **First comment:** the origin story + honest limitations (not load testing,
-  not a replacement for real user research, LLM costs are yours)
+- **Description:** AI personas — impatient shoppers, seniors, keyboard-only
+  users, chaos monkeys — attack your site in real browsers. Three independent
+  engines verify every accusation. You get a damage report and a survival
+  grade from S to F.
+- **First comment:** origin story + honest limitations (not load testing, not
+  a replacement for user research, LLM costs are yours) + the phantom-click
+  story.
 
 ## X/Twitter thread opener
 
@@ -54,16 +72,25 @@ MIT licensed, built on browser-use. Bring your own Anthropic/OpenAI key.
 >
 > Survival grade: D.
 >
-> Open source: [link]
+> Open source: https://github.com/anhhuyn411-alt/crowd-test
 
-## Distribution list
+Thread beats: (2) the mob table screenshot, (3) the phantom-click story →
+tribunal diagram, (4) 20-line YAML persona, (5) skill + MCP ("your coding
+agent runs the mob for you"), (6) call for community ringleaders.
 
-- [ ] PR adding crowd-test to awesome-ai-testing
-- [ ] browser-use Discord/community showcase
-- [ ] r/webdev, r/QualityAssurance, r/SideProject
-- [ ] dev.to / Hashnode write-up: "My app failed its first mob test"
+## Distribution list (after HN, same week)
+
+- [ ] browser-use Discord/community showcase (they love ecosystem tools)
+- [ ] r/webdev, r/QualityAssurance, r/SideProject, r/ClaudeAI (MCP angle)
+- [ ] MCP server directories: modelcontextprotocol/servers community list,
+      mcp.so, PulseMCP, Smithery — submit crowd-test-mcp to each
+- [ ] awesome-ai-testing / awesome-mcp-servers PRs
+- [ ] dev.to write-up: "The mob unanimously convicted an innocent button" —
+      the false-positive forensics story is the hook, tool is the payoff
 
 ## Cadence
 
 Launch Tue–Thu, ~14:00–16:00 UTC (HN morning US). Reply to every comment in
-the first 3 hours. Have the `--mob 50` demo GIF ready to post in replies.
+the first 3 hours — comment velocity is what keeps a Show HN alive. Have the
+sample report (examples/sample-report.html) ready to link; post the real
+`--mob 10 --tribunal` GIF in replies once credits are topped up.
