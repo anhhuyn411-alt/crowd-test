@@ -96,29 +96,51 @@ Every run ends with a verdict, computed from findings and mob satisfaction:
 
 Add `--fail-on-critical` in CI to block the merge when the mob draws blood.
 
-## The detective 🕵️
+## The tribunal ⚖️
 
-A mob is dramatic — that's the point — but drama sometimes exaggerates. Add
-`--verify` and every critical/major accusation gets handed to an independent
-**detective agent**: a cold, skeptical QA engineer with no persona and no
-stake, who starts from a clean page load and tries to reproduce the issue.
+A mob is dramatic — that's the point — but drama sometimes exaggerates. Worse,
+browser automation itself sometimes glitches, and then every agent on the same
+stack hallucinates the same bug. crowd-test answers with up to **three
+independent layers of verification**, each on a different architecture:
 
-- ✅ **verified** — the detective reproduced it. It's real. Go fix it.
-- ⚠️ **not reproduced** — stays in the report for transparency, but stops
-  counting toward your survival grade.
+1. 🕵️ **The detective** (`--verify`) — a cold, skeptical QA agent with no
+   persona and no stake starts from a clean page load and tries to reproduce
+   every critical/major accusation.
+2. 🔬 **The cross-engine probe** (`--cross-verify`) — an LLM translates the
+   accusation into a tiny declarative repro script (plain data, never code) and
+   a raw **Playwright** interpreter — a completely different browser stack —
+   executes it. This is the layer that catches automation artifacts: bugs the
+   mob *and* the detective both swear they saw, on a site that actually works.
+3. ⚖️ **The tribunal** (`--tribunal`) — the last court of appeal. A
+   [Microsoft Webwright](https://github.com/microsoft/Webwright) agent — a
+   third harness that writes and debugs its own repro scripts — retries the
+   bug independently and files its verdict.
 
 ```bash
-crowd-test run https://your-app.com --mob 10 --verify
+crowd-test run https://your-app.com --mob 10 --verify        # detective only
+crowd-test run https://your-app.com --mob 10 --cross-verify  # + Playwright probe
+crowd-test run https://your-app.com --mob 10 --tribunal      # all three
 ```
 
-The mob accuses. The detective convicts. Your grade only bleeds for real bugs.
+- ✅ **verified** — reproduced independently. It's real. Go fix it.
+- ⚠️ **not reproduced** — stays in the report for transparency, but stops
+  counting toward your survival grade.
+- 🔬 **disputed** — a different engine watched the same flow work fine; the
+  accusation was almost certainly an automation artifact. Excluded from grade.
 
-One honest caveat: the detective drives the same browser engine as the mob, so
-an artifact of the automation stack itself can fool them both. Cross-engine
-verification (re-checking accusations in a second, independent browser stack)
-is on the roadmap. Note that crowd-test runs the browser with automation
-extensions disabled so personas see your site exactly as real users do —
-cookie banners and all.
+The mob accuses. The tribunal convicts. Your grade only bleeds for real bugs.
+
+Extra installs for the deeper layers:
+
+```bash
+pip install crowd-test[probe]        # --cross-verify (Playwright)
+playwright install chromium
+pip install git+https://github.com/microsoft/Webwright   # --tribunal
+```
+
+Note that crowd-test runs the mob's browser with automation extensions
+disabled so personas see your site exactly as real users do — cookie banners
+and all.
 
 ## Quick start
 
@@ -141,6 +163,27 @@ You get:
 - **`report.html`** — a shareable dark-mode damage report with the survival
   grade, each persona's verdict, and their in-character complaints
 - **`results.json`** — machine-readable results for your own tooling
+
+## Use as a Claude Code skill
+
+Let your coding agent run the mob for you. Install the skill once:
+
+```bash
+git clone https://github.com/anhhuyn411-alt/crowd-test /tmp/crowd-test-skill
+mkdir -p ~/.claude/skills
+cp -r /tmp/crowd-test-skill/skills/crowd-test ~/.claude/skills/crowd-test
+```
+
+Then, inside Claude Code (or any agent that speaks the
+[open skill standard](https://github.com/anthropics/skills)):
+
+```
+/crowd-test send the mob at https://staging.your-app.com
+```
+
+The agent installs crowd-test if needed, picks sensible personas, runs the
+crew, and summarizes the damage report with fixes — instead of you reading raw
+findings. The same folder works in Codex, Cursor, and Gemini CLI.
 
 ## How it works
 
@@ -172,7 +215,9 @@ your own staging and production sites, not other people's.
 
 - [x] Detective agent: adversarial verification of every critical/major finding (`--verify`)
 - [x] Machine-readable `results.json` next to every report
-- [ ] Cross-engine detective: verify accusations in a second, independent browser stack
+- [x] Cross-engine detective: verify accusations in a second, independent browser stack (`--cross-verify`)
+- [x] The tribunal: a third harness (Microsoft Webwright) as the last court of appeal (`--tribunal`)
+- [x] Claude Code skill: `/crowd-test` from inside your coding agent (`skills/crowd-test/`)
 - [ ] GitHub Action: the mob tests your preview deploy and posts the survival grade on the PR
 - [ ] Screenshots attached to every finding
 - [ ] Survival badge for your README (`survived the mob: A`)

@@ -9,6 +9,7 @@ from crowdtest.persona import Persona
 from crowdtest.probe import cross_probe
 from crowdtest.results import CrewResult, PersonaResult
 from crowdtest.runner import LLMFactory, run_persona
+from crowdtest.tribunal import tribunal_verify
 from crowdtest.verify import verify_finding
 
 ProgressHook = Callable[[str, str], None]
@@ -27,6 +28,8 @@ async def run_crew(
     concurrency: int = 3,
     verify: bool = False,
     cross: bool = False,
+    tribunal: bool = False,
+    provider: str = "anthropic",
     on_progress: ProgressHook | None = None,
 ) -> CrewResult:
     """Run every persona through the site, at most *concurrency* at a time.
@@ -70,6 +73,12 @@ async def run_crew(
                     if cross and finding.verified != "not_reproduced":
                         await cross_probe(
                             finding, url, llm_factory, headless=headless
+                        )
+                    # Same reasoning as the probe: only a clean refutation
+                    # spares the finding a third opinion.
+                    if tribunal and finding.verified != "not_reproduced":
+                        await tribunal_verify(
+                            finding, url, provider, headless=headless
                         )
                     if on_progress:
                         on_progress(

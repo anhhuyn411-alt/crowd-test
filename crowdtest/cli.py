@@ -85,8 +85,10 @@ def cmd_run(args: argparse.Namespace) -> int:
             headless=not args.headed,
             max_steps=args.max_steps,
             concurrency=args.concurrency,
-            verify=args.verify or args.cross_verify,
-            cross=args.cross_verify,
+            verify=args.verify or args.cross_verify or args.tribunal,
+            cross=args.cross_verify or args.tribunal,
+            tribunal=args.tribunal,
+            provider=provider,
             on_progress=on_progress,
         )
     )
@@ -166,6 +168,11 @@ def build_parser() -> argparse.ArgumentParser:
                      help="like --verify, plus re-check confirmed findings in a "
                           "second independent browser engine (Playwright); needs "
                           "pip install crowd-test[probe]")
+    run.add_argument("--tribunal", action="store_true",
+                     help="convene the full tribunal: detective + Playwright "
+                          "probe + a Microsoft Webwright agent (third harness); "
+                          "implies --verify and --cross-verify, needs "
+                          "pip install git+https://github.com/microsoft/Webwright")
     run.add_argument("--headed", action="store_true",
                      help="show browser windows instead of headless")
     run.add_argument("--out", default="crowd-test-reports",
