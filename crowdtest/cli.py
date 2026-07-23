@@ -93,14 +93,17 @@ def cmd_run(args: argparse.Namespace) -> int:
         )
     )
 
-    print()
-    print(build_markdown(crew))
+    # Reports hit the disk before anything else touches stdout: a console
+    # that chokes on emoji must never cost the user their run.
     md_path, html_path = write_reports(crew, args.out)
     json_path = Path(args.out) / "results.json"
     json_path.write_text(
         json.dumps(dataclasses.asdict(crew), indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
+
+    print()
+    print(build_markdown(crew))
     print(f"\nReports written:\n  {md_path}\n  {html_path}\n  {json_path}")
 
     counts = crew.findings_by_severity()
@@ -187,6 +190,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    # Windows consoles and redirected stdout often default to a legacy
+    # codepage that can't print the report's emoji; degrade gracefully
+    # instead of dying with UnicodeEncodeError.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
     args = build_parser().parse_args()
     sys.exit(args.func(args))
 
