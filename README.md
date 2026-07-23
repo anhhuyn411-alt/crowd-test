@@ -185,6 +185,10 @@ The agent installs crowd-test if needed, picks sensible personas, runs the
 crew, and summarizes the damage report with fixes — instead of you reading raw
 findings. The same folder works in Codex, Cursor, and Gemini CLI.
 
+Prefer MCP? [**crowd-test-mcp**](https://github.com/anhhuyn411-alt/crowd-test-mcp)
+exposes the mob as an MCP server for Claude Desktop, Claude Code, Cursor, and
+any other MCP client: `pip install crowd-test-mcp`.
+
 ## How it works
 
 ```mermaid
@@ -218,6 +222,7 @@ your own staging and production sites, not other people's.
 - [x] Cross-engine detective: verify accusations in a second, independent browser stack (`--cross-verify`)
 - [x] The tribunal: a third harness (Microsoft Webwright) as the last court of appeal (`--tribunal`)
 - [x] Claude Code skill: `/crowd-test` from inside your coding agent (`skills/crowd-test/`)
+- [x] MCP server: the mob on tap for any MCP client ([crowd-test-mcp](https://github.com/anhhuyn411-alt/crowd-test-mcp))
 - [ ] GitHub Action: the mob tests your preview deploy and posts the survival grade on the PR
 - [ ] Screenshots attached to every finding
 - [ ] Survival badge for your README (`survived the mob: A`)
